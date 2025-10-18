@@ -51,7 +51,7 @@ def readPDFFile() :
                 if int(page) == 0 :
                     product_info = makeDefaultDataExcel(text)
             
-            image = uploadUrlImage(name)
+            imageURL = uploadUrlImage(name)
             complianceResult = makeComplianceData(fullText)
             physical_data = makePhysicalData(fullText)
             agencyResult = makeAgencyData(fullText)
@@ -59,14 +59,12 @@ def readPDFFile() :
             useResult.append(makeUseWithPartData(fullText))
             globalResult.append(makeGlobalData(fullText))
 
-            finalResult['image'] = image
-            finalResult = {**product_info, **(complianceResult or {}), **(physical_data or {}), **(agencyResult or {})}
+            finalResult = {**imageURL, **product_info, **(complianceResult or {}), **(physical_data or {}), **(agencyResult or {})}
             finalResult['mateswith'] = matesResult
             finalResult['useWith'] = useResult
             finalResult['global'] = globalResult
-
             print(finalResult)
-            # excelData.append(final_data)
+            excelData.append(finalResult)
 
             print(f'---------------------------- {index + 1}번째 {name} 파일을 완료하였습니다. ------------------------------------------- ')
             print('\n')
@@ -174,75 +172,75 @@ def changeHeader(text):
     return text.lower().replace(' ', '')
 
 
-# def saveToExcel(data_list, filename='output.xlsx'):
-#     wb = Workbook()
-#     ws = wb.active
-#     ws.title = 'Product Data'
+def saveToExcel(data_list, filename='output.xlsx'):
+    wb = Workbook()
+    ws = wb.active
+    ws.title = 'Product Data'
     
-#     special_headers = [
-#         'Mates With PartNo', 'Mates With Desc', 
-#         'Use With PartNo', 'Use With Desc', 
-#         'Global PartNo', 'Global Desc'
-#     ]
+    special_headers = [
+        'Mates With PartNo', 'Mates With Desc', 
+        'Use With PartNo', 'Use With Desc', 
+        'Global PartNo', 'Global Desc'
+    ]
     
-#     all_headers = (
-#         ['NO'] +
-#         productHeader + 
-#         complianceHeader + 
-#         physicalHeader + 
-#         agencyHeader +
-#         special_headers 
-#     )
+    all_headers = (
+        ['NO'] +
+        productHeader + 
+        complianceHeader + 
+        physicalHeader + 
+        agencyHeader +
+        special_headers 
+    )
     
-#     final_headers = list(dict.fromkeys(all_headers))
-#     ws.append(final_headers)
+    final_headers = list(dict.fromkeys(all_headers))
+    ws.append(final_headers)
     
-#     for file_index, data in enumerate(data_list):
+    for file_index, data in enumerate(data_list):
         
-#         mates_list = data.get('Mates With') or [] 
-#         use_list = data.get('Use With') or []
-#         global_list = data.get('Global') or []
+        mates_list = data.get('Mates With') or [] 
+        use_list = data.get('Use With') or []
+        global_list = data.get('Global') or []
 
-#         max_len = max(len(mates_list), len(use_list), len(global_list))
-#         num_rows = max(max_len, 1)
+        max_len = max(len(mates_list), len(use_list), len(global_list))
+        num_rows = max(max_len, 1)
 
-#         for i in range(num_rows):
-#             row = []
-#             for header in final_headers:
+        for i in range(num_rows):
+            row = []
+            for header in final_headers:
                 
-#                 if header.startswith('Mates With'):
-#                     target_list = mates_list
-#                     key = 'partNo' if 'PartNo' in header else 'desc'
-#                 elif header.startswith('Use With'):
-#                     target_list = use_list
-#                     key = 'partNo' if 'PartNo' in header else 'desc'
-#                 elif header.startswith('Global'):
-#                     target_list = global_list
-#                     key = 'partNo' if 'PartNo' in header else 'desc'
-#                 else:
-#                     target_list = None
+                if header.startswith('Mates With'):
+                    target_list = mates_list
+                    key = 'partNo' if 'PartNo' in header else 'desc'
+                elif header.startswith('Use With'):
+                    target_list = use_list
+                    key = 'partNo' if 'PartNo' in header else 'desc'
+                elif header.startswith('Global'):
+                    target_list = global_list
+                    key = 'partNo' if 'PartNo' in header else 'desc'
+                else:
+                    target_list = None
                         
-#                 if target_list is not None:
-#                     if i < len(target_list):
-#                         item = target_list[i]
-#                         row.append(item.get(key, ''))
-#                     else:
-#                         row.append('')
+                if target_list is not None:
+                    if i < len(target_list):
+                        item = target_list[i]
+                        row.append(item.get(key, ''))
+                    else:
+                        row.append('')
 
-#                 else:
-#                     value = data.get(header)
+                else:
+                    value = data.get(header)
                     
-#                     if header == 'NO':
-#                         row.append(file_index + 1) 
-#                     elif value is not None:
-#                         row.append(str(value))
-#                     else:
-#                         row.append('')
+                    if header == 'NO':
+                        row.append(file_index + 1) 
+                    elif value is not None:
+                        row.append(str(value))
+                    else:
+                        row.append('')
 
-#             ws.append(row)
+            ws.append(row)
         
-#     wb.save(filename)
-#     print(f'\n엑셀 파일이 저장되었습니다: {filename}')
+    wb.save(filename)
+    print(f'\n엑셀 파일이 저장되었습니다: {filename}')
 
 # def getImage():
 #     currentPDF = Path(currentPDFDir)
@@ -279,34 +277,33 @@ def changeHeader(text):
 #     doc.close()
 
 def uploadUrlImage(name) :
-    # url = "https://api.imgbb.com/1/upload"
-    # possible = ['.png', '.jpg', '.jpeg']
+    url = "https://api.imgbb.com/1/upload"
+    possible = ['.png', '.jpg', '.jpeg']
 
-    # for ext in possible:
-    #     imagePath = 'C:/Users/개발팀/OneDrive/Desktop/molexProducts/img'
-    #     tempPath = f'{imagePath}/{name}{ext}'
-    #     if os.path.exists(tempPath):
-    #         imagePath = tempPath
-    #         break
+    for ext in possible:
+        imagePath = 'C:/Users/개발팀/OneDrive/Desktop/molexProducts/img'
+        tempPath = f'{imagePath}/{name}{ext}'
+        if os.path.exists(tempPath):
+            imagePath = tempPath
+            break
 
-    # with open(imagePath, 'rb') as f :
-    #     files = {'image': f}
-    #     data = {'key' : '64bbef1938be158b5d8c6c6f5f58d3ce'}
-    #     response = requests.post(url, files=files, data=data)
+    with open(imagePath, 'rb') as f :
+        files = {'image': f}
+        data = {'key' : '64bbef1938be158b5d8c6c6f5f58d3ce'}
+        response = requests.post(url, files=files, data=data)
 
     try: 
-        # if response.status_code == 200:
-        #     result = response.json()
-        #     imageUrl = result['data']['url']
-        #     return imageUrl
-        # else:
-        #     return None
+        if response.status_code == 200:
+            result = response.json()
+            imageURL = result['data']['url']
+            return { "imageURL": imageURL } 
+        else:
+            return None
         
-        return "1"
     except Exception as e:
         print('실행 중 오류 발생', e)
 
 excelData = readPDFFile()
-# saveToExcel(excelData, 'product_data.xlsx')
+saveToExcel(excelData, 'product_data.xlsx')
 
 # getImage()
